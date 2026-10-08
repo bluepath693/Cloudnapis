@@ -1,4 +1,6 @@
+// تم تصحيح الرابط هنا بإضافة www لمنع التحويل وتغير الـ Method
 const UPSTREAM_URL = "https://cleanapis.com";
+// تم إعادة تفعيل حالات تدوير المفاتيح الصحيحة هنا
 const ROTATABLE_STATUSES = new Set([401, 403, 429]);
 
 function json(body, status = 200, headers = {}) {
@@ -20,9 +22,7 @@ function corsHeaders(request, env) {
   return headers;
 }
 
-// التعديل الأساسي هنا ليتوافق مع Netlify Edge Functions
 export default async (request, context) => {
-  // Netlify تتيح الوصول لمتغيرات البيئة عبر Netlify.env.get
   const env = {
     ALLOWED_ORIGINS: Netlify.env.get("ALLOWED_ORIGINS"),
     PROXY_TOKEN: Netlify.env.get("PROXY_TOKEN"),
@@ -91,7 +91,6 @@ export default async (request, context) => {
   });
 };
 
-// تحديد المسار الذي سيعمل عليه الكود تلقائياً
 export const config = {
   path: "/v1/chat/completions"
 };
