@@ -1,7 +1,6 @@
-// تم تصحيح الرابط هنا بإضافة www لمنع التحويل وتغير الـ Method
-const UPSTREAM_URL = "https://cleanapis.com";
-// تم إعادة تفعيل حالات تدوير المفاتيح الصحيحة هنا
-const ROTATABLE_STATUSES = new Set([401, 403, 429]);
+// النطاق الرسمي الصحيح بدون www لمنع التحويلات
+const UPSTREAM_URL = "https://cleanapis.com/v1/chat/completions";
+const ROTATABLE_STATUSES = new Set();
 
 function json(body, status = 200, headers = {}) {
   return new Response(JSON.stringify(body), {
@@ -33,9 +32,13 @@ export default async (request, context) => {
 
   const cors = corsHeaders(request, env);
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
-  if (new URL(request.url).pathname !== "/v1/chat/completions") {
+  
+  // قبول العمل على المسار الرئيسي أو المسار الكامل للتأكد من اشتغال الدالة
+  const url = new URL(request.url);
+  if (url.pathname !== "/v1/chat/completions" && url.pathname !== "/") {
     return json({ error: "Not found" }, 404, cors);
   }
+  
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405, cors);
 
   const auth = request.headers.get("Authorization") || "";
@@ -48,9 +51,6 @@ export default async (request, context) => {
     payload = await request.json();
   } catch {
     return json({ error: "Request body must be valid JSON" }, 400, cors);
-  }
-  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
-    return json({ error: "Request body must be a JSON object" }, 400, cors);
   }
 
   const keys = [env.CLEANAPIS_KEY_1, env.CLEANAPIS_KEY_2, env.CLEANAPIS_KEY_3]
@@ -91,6 +91,7 @@ export default async (request, context) => {
   });
 };
 
+// إجبار المنصة على تشغيل الدالة في المسارين معاً
 export const config = {
-  path: "/v1/chat/completions"
+  path: ["/", "/v1/chat/completions"]
 };
